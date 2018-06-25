@@ -115,21 +115,21 @@ inherits(ArraySchema, MixedSchema, {
     return next;
   },
 
-  required(message = mixed.required) {
+  required(message = null) {
     var next = MixedSchema.prototype.required.call(this, message);
 
     return next.test({
       message,
+      localePath: 'mixed.required',
       name: 'required',
       test: hasLength,
     });
   },
 
   min(min, message) {
-    message = message || locale.min;
-
     return this.test({
       message,
+      localePath: 'array.min',
       name: 'min',
       exclusive: true,
       params: { min },
@@ -143,6 +143,7 @@ inherits(ArraySchema, MixedSchema, {
     message = message || locale.max;
     return this.test({
       message,
+      localePath: 'array.max',
       name: 'max',
       exclusive: true,
       params: { max },

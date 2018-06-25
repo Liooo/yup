@@ -31,15 +31,21 @@ inherits(StringSchema, MixedSchema, {
     return typeof value === 'string';
   },
 
-  required(message = mixed.required) {
+  required(message = null) {
     var next = MixedSchema.prototype.required.call(this, message);
 
-    return next.test({ message, name: 'required', test: hasLength });
+    return next.test({
+      message,
+      localePath: 'mixed.required',
+      name: 'required',
+      test: hasLength,
+    });
   },
 
-  length(length, message = locale.length) {
+  length(length, message = null) {
     return this.test({
       message,
+      localePath: 'string.length',
       name: 'length',
       exclusive: true,
       params: { length },
@@ -49,7 +55,7 @@ inherits(StringSchema, MixedSchema, {
     });
   },
 
-  min(min, message = locale.min) {
+  min(min, message = null) {
     return this.test({
       message,
       name: 'min',
@@ -61,7 +67,7 @@ inherits(StringSchema, MixedSchema, {
     });
   },
 
-  max(max, message = locale.max) {
+  max(max, message = null) {
     return this.test({
       name: 'max',
       exclusive: true,
@@ -76,15 +82,21 @@ inherits(StringSchema, MixedSchema, {
   matches(regex, options) {
     let excludeEmptyString = false;
     let message;
+    let localePath = 'string.matches';
 
     if (options) {
-      if (options.message || options.hasOwnProperty('excludeEmptyString')) {
-        ({ excludeEmptyString, message } = options);
+      if (
+        options.message ||
+        options.hasOwnProperty('excludeEmptyString') ||
+        options.hasOwnProperty('localePath')
+      ) {
+        ({ excludeEmptyString, message, localePath } = options);
       } else message = options;
     }
 
     return this.test({
-      message: message || locale.matches,
+      message: message,
+      localePath,
       params: { regex },
       test: value =>
         isAbsent(value) ||
@@ -93,16 +105,18 @@ inherits(StringSchema, MixedSchema, {
     });
   },
 
-  email(message = locale.email) {
+  email(message = null) {
     return this.matches(rEmail, {
       message,
+      localePath: 'string.email',
       excludeEmptyString: true,
     });
   },
 
-  url(message = locale.url) {
+  url(message = null) {
     return this.matches(rUrl, {
       message,
+      localePath: 'string.url',
       excludeEmptyString: true,
     });
   },
@@ -112,30 +126,33 @@ inherits(StringSchema, MixedSchema, {
     return this.default('').transform(val => (val === null ? '' : val));
   },
 
-  trim(message = locale.trim) {
+  trim(message = null) {
     return this.transform(val => (val != null ? val.trim() : val)).test({
       message,
+      localePath: 'string.trim',
       name: 'trim',
       test: isTrimmed,
     });
   },
 
-  lowercase(message = locale.lowercase) {
+  lowercase(message = null) {
     return this.transform(
       value => (!isAbsent(value) ? value.toLowerCase() : value),
     ).test({
       message,
+      localePath: 'string.lowercase',
       name: 'string_case',
       exclusive: true,
       test: value => isAbsent(value) || value === value.toLowerCase(),
     });
   },
 
-  uppercase(message = locale.uppercase) {
+  uppercase(message = null) {
     return this.transform(
       value => (!isAbsent(value) ? value.toUpperCase() : value),
     ).test({
       message,
+      localePath: 'string.uppercase',
       name: 'string_case',
       exclusive: true,
       test: value => isAbsent(value) || value === value.toUpperCase(),
